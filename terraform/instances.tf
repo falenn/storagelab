@@ -23,3 +23,22 @@ resource "aws_key_pair" "worker-key" {
   public_key = file("~/.ssh/id_rsa.pub")
 }
 
+# Create and bootstrap EC2 in us-east-1
+resource "aws_instance" "k8s-master" {
+  provider = aws.region-master
+  ami = data.aws_ssm_parameter.linuxAmi.value
+  instance_type = var.instance-type
+  key_name = aws_key_par.master-key.key_name
+  associate_public_ip_address = true
+  vpc_security_group_ids = [aws_security_group.k8s-core-sg.id]
+  subnet_id = aws_subnet.subnet_1.id
+  
+  tags = {
+    Name = "k8s-master",
+    lab = "storage"
+  }
+  
+  depends_on = [aws_main_route_table_association.set-master-default-rt-assoc]
+}
+
+
