@@ -1,0 +1,11 @@
+{
+  "Statement": [{
+    "Sid": "Access-to-specific-bucket-only",
+    "Principal": "*",
+    "Action": [
+      "s3:*"
+    ],
+    "Effect": "Allow",
+    "Resource": "arn:aws:s3:::storagelab/*"
+  }]
+}
