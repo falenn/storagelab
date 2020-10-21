@@ -38,7 +38,28 @@ resource "aws_subnet" "subnet_2" {
   cidr_block        = "10.0.2.0/24"
 }
 
+# Create the Route Table
+resource "aws_route_table" "vpc_master_rt" {
+  provider = aws.region-master
+  vpc_id = aws_vpc.vpc_master.id
+  tags = {
+    Name = "storagelab k8s master VPC Route Table"
+  }
+}
 
+# Create the Internet Access
+resource "aws_route" "vpc_internet_access" {
+  provider                 = aws.region-master
+  route_table_id         = aws_route_table.vpc_master_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
+}
 
+# Associate the Route Table with the Subnet
+resource "aws_route_table_association" "vpc_association" {
+  provider         = aws.region-master
+  subnet_id      = aws_subnet.subnet_1.id
+  route_table_id = aws_route_table.vpc_master_rt.id
+}
 
 

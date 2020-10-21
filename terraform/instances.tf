@@ -25,20 +25,41 @@ resource "aws_key_pair" "worker-key" {
 
 # Create and bootstrap EC2 in us-east-1
 resource "aws_instance" "k8s-master" {
-  provider = aws.region-master
-  ami = data.aws_ssm_parameter.linuxAmi.value
-  instance_type = var.instance-type
-  key_name = aws_key_par.master-key.key_name
+  provider                    = aws.region-master
+  ami                         = data.aws_ssm_parameter.linuxAmi.value
+  instance_type               = var.instance-type
+  key_name                    = aws_key_pair.master-key.key_name
   associate_public_ip_address = true
-  vpc_security_group_ids = [aws_security_group.k8s-core-sg.id]
-  subnet_id = aws_subnet.subnet_1.id
-  
+  vpc_security_group_ids      = [aws_security_group.k8s-core-sg.id]
+  subnet_id                   = aws_subnet.subnet_1.id
+
+  # tags used by ansible for dynamic inventory resolution
   tags = {
     Name = "k8s-master",
-    lab = "storage"
+    lab  = "storage",
+    type = "k8s"
   }
-  
-  depends_on = [aws_main_route_table_association.set-master-default-rt-assoc]
+
+  # not needed as all in the same VPC right now
+  #depends_on = [aws_main_route_table_association.set-master-default-rt-assoc]
 }
 
+# create EC2 k8s-worker in us-east-1
+resource "aws_instance" "k8s-worker" {
+  provider                    = aws.region-master
+  count                       = var.k8s-workers-count
+  ami                         = data.aws_ssm_parameter.linuxAmi.value
+  instance_type               = var.instance-type
+  key_name                    = aws_key_pair.master-key.key_name
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.k8s-core-sg.id]
+  subnet_id                   = aws_subnet.subnet_1.id
 
+  tags = {
+    Name = join("_", ["k8s-worker", count.index + 1]),
+    lab  = "storage",
+    type = "k8s"
+  }
+
+  depends_on = [aws_instance.k8s-master]
+}
