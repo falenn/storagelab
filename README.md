@@ -5,3 +5,6 @@
 2. setup se bucket for terraform state
 
 
+Create EC2 instance
+- attach S3FullAccess Role (need access for EC2 and S3)
+- attach User / SSH Key account

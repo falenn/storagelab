@@ -10,4 +10,6 @@ output "K8s-Worker-Public-IPs" {
   }
 }
 
-
+output "K8s-Main-K8s-Master-EIP" {
+  value = aws_eip.k8s_eip.public_ip
+}

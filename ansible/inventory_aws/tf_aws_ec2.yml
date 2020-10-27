@@ -1,0 +1,36 @@
+---
+plugin: aws_ec2
+
+regions: 
+ - us-east-1
+ - us-west-2
+
+strict: False
+
+# using AWS ec2 tags to inform inventory
+keyed_groups:
+ - key: tags
+   prefix: tag
+
+ - key: architecture
+   prefix: arch
+ - key: tags.Applications
+   separator: ''
+ - key: instance_type
+   prefix: aws_instance_type
+ - key: placement.region
+   prefix: aws_region
+ - key: image_id
+   prefix: aws_image
+ - key: hypervisor
+   prefix: aws_hypervisor
+ - key: 'security_groups|json_query("[].group_id")'
+   prefix: 'security_groups'
+
+hostnames:
+# a list in order of precedence for hostname variables.
+#  
+ - ip-address
+ - dns-name
+ - tag:Name
+

@@ -23,6 +23,11 @@ variable "instance-type" {
   default = "t3.micro"
 }
 
+variable "k8s-master-instance-type" {
+  type    = string
+  default = "t3.medium"
+}
+
 variable "k8s-workers-count" {
   type    = number
   default = 2

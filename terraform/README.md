@@ -62,6 +62,7 @@ ssh-keygen -t rsa -b 2048
 ```
 When uploading ssh keys for ssh access to ec2 nodes, remember, ssh key storge is regional, so we have to place a public key in each region.
 
-
+User_data
+/var/log/cloud-init-output.log for debug
 
 
