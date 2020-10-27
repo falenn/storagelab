@@ -72,7 +72,7 @@ resource "aws_instance" "k8s-master" {
 
 # associate EIP with k8s-master
 resource "aws_eip" "k8s_eip" {
-  provider = aws.region-master 
+  provider = aws.region-master
   instance = aws_instance.k8s-master.id
   vpc      = true
   tags = {
@@ -87,7 +87,7 @@ resource "aws_eip" "k8s_eip" {
 }
 
 resource "aws_eip_association" "k8s_eip_assoc" {
-  provider = aws.region-master
+  provider      = aws.region-master
   instance_id   = aws_instance.k8s-master.id
   allocation_id = aws_eip.k8s_eip.id
 }
