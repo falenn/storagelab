@@ -41,7 +41,7 @@ cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
-sudo sysctl --system
+sysctl --system
 
 # Setup k8s repo
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
@@ -56,17 +56,21 @@ exclude=kubelet kubeadm kubectl
 EOF
 
 # Set SELinux in permissive mode (effectively disabling it)
-sudo setenforce 0
-sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+setenforce 0
+sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
-sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 
-sudo systemctl enable --now kubelet
+systemctl enable --now kubelet
 
 kubeadm init --pod-network-cidr=192.168.0.0/16
 
-mkdir -p /root/.kube
-cp -i /etc/kubernetes/admin.conf ~/.kube/config
+# copy config to ec2-user
+mkdir -p /home/ec2-user/.kube
+cp -i /etc/kubernetes/admin.conf /home/ec2-user/.kube/config
+chown -R ec2-user: /home/ec2-user/.kube
+
+# Make master schedulable
 kubectl taint nodes --all node-role.kubernetes.io/master-
 
 # install CNI

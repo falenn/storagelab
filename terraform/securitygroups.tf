@@ -21,9 +21,6 @@ resource "aws_security_group" "lb-sg" {
 }
 
 
-
-
-
 # Create security groups for k8s core
 resource "aws_security_group" "k8s-core-sg" {
   provider    = aws.region-master
@@ -58,5 +55,4 @@ resource "aws_security_group" "k8s-core-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 

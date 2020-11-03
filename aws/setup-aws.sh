@@ -11,6 +11,10 @@ profile="storagelab"
 policy="storagelab"
 policyfile="file://storagelab-policy-relaxed.json"
 
+devopsrole="storaglab-devops"
+devopspolicy="devopspolicy"
+devopspolicyfile="file://devops-policy.json"
+trustpolicyfile="file://trust-policy.json"
 #default mode
 mode="create"
 
@@ -41,9 +45,28 @@ if [[ "$mode" == "delete" ]]; then
   aws iam remove-user-from-group --group-name $group --user-name $user
   aws iam delete-group --group-name $group
   aws iam delete-policy --policy-arn arn:aws:iam::$acocunt:policy/$policy
+  aws iam delete-role  --role-name $devopsrole
+  aws iam delete-policy --policy-arn arn:aws:iam::$account:policy/$devopspolicy
+ 
 fi
 
 if [[ "$mode" == "create" ]]; then
+  echo "Creating devops policies for DevOps automation"
+  aws iam get-policy --policy-arn arn:aws:iam::$account:policy/$devopspolicy
+  if [[ $? != 0 ]]; then
+    echo "Creating devops role and policies"
+    aws iam create-policy --policy-name $devopspolicy \
+        --policy-document $devopspolicyfile
+    aws iam create-role --role-name $devopsrole \
+	--assume-role-policy-document $trustpolicyfile
+    aws iam attach-role-policy --role-name $devopsrole \
+	--policy-arn arn:aws:iam::$account:policy/$devopspolicy
+    aws iam attach-role-policy --role-name $devopsrole \
+        --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
+    aws iam attach-role-policy --role-name $devopsrole \
+        --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+  fi
+
   echo "Creating resources"
   aws iam get-policy --policy-arn arn:aws:iam::$account:policy/$policy
   if [[ $? != 0 ]]; then
@@ -76,6 +99,7 @@ if [[ "$mode" == "create" ]]; then
   echo "Listing user and attached policies"
   aws iam list-attached-user-policies --user-name $user
 fi
+
 
 if [[ "$mode" == "createS3" ]]; then
   # create s3 bucket for terraform state 
